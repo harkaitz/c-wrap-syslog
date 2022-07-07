@@ -17,8 +17,13 @@ For example the following program:
         warn("!!You should never read this!!");
         return 0;
     }
+    
+Compiled like this:
 
-Generates the following output:
+    gcc ...                 # Not wrapped
+    gcc ... `l-wrap-syslog` # Wrapper.
+
+Generates the following output on execution:
 
     ==== NOT WRAPPED =========
     example: Here backtrace.
