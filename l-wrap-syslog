@@ -1,0 +1,9 @@
+#!/bin/sh -e
+echo -rdynamic
+echo -l:libwrap-syslog.a
+for n in syslog vsyslog verr err verrx errx; do
+    case "${1}" in
+        ''|gcc) echo -Wl,--wrap="${n}" ;;
+        ld)     echo --wrap="${n}"     ;;
+    esac
+done
