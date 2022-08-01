@@ -1,22 +1,49 @@
+#include <stdnoreturn.h>
 #include <syslog.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <execinfo.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#if __STDC_VERSION__ < 201112L
+#  define _Noreturn
+#endif
 
-__attribute__((weak)) bool SYSLOG_PRINT_STACKTRACE = true;
 
+__attribute__((weak)) bool        SYSLOG_PRINT_STACKTRACE = true;
+__attribute__((weak)) char const *SYSLOG_LOG_FILE         = NULL;
+__attribute__((weak)) bool        SYSLOG_PRINT_STARTUP    = false;
 
+extern    void __real_openlog (const char *, int, int);
 extern    void __real_vsyslog (int, char const *, va_list);
 extern    void __real_syslog  (int, char const *, ...);
 _Noreturn void __real_verr    (int, const char *, va_list);
 _Noreturn void __real_verrx   (int, const char *, va_list);
 
+void __wrap_openlog (const char *_ident, int _logopt, int _facility) {
+    if (SYSLOG_LOG_FILE) {
+        int log_fd = open(SYSLOG_LOG_FILE, O_WRONLY|O_APPEND|O_CREAT, 0644);
+        if (log_fd != -1) {
+            dup2(log_fd, 2);
+            close(log_fd);
+        }
+        __real_openlog(_ident, _logopt | LOG_PERROR, _facility);
+    } else {
+        __real_openlog(_ident, _logopt, _facility);
+    }
+    if (SYSLOG_PRINT_STARTUP) {
+        syslog(LOG_INFO, "-");
+        syslog(LOG_INFO, "PROGRAM LAUNCHED: %s", _ident);
+        syslog(LOG_INFO, "-");
+    }
+}
+
 void print_backtrace(void) {
     char **strings; int i;
     void  *backtrace_b[20];
-    size_t backtrace_bsz;
+    int    backtrace_bsz;
     backtrace_bsz = backtrace(backtrace_b, 20);
     strings = backtrace_symbols (backtrace_b, backtrace_bsz);
     if (strings) {
@@ -35,7 +62,7 @@ void __wrap_vsyslog(int _prio, char const *_fmt, va_list _va) {
     if (_prio == LOG_ERR && SYSLOG_PRINT_STACKTRACE) {
         print_backtrace();
     }
-    return __real_vsyslog(_prio, _fmt, _va);
+    __real_vsyslog(_prio, _fmt, _va);
 }
 
 void __wrap_syslog(int _prio, char const *_fmt, ...) {
