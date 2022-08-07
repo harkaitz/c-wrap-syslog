@@ -1,14 +1,18 @@
-#include <stdnoreturn.h>
+#include <features.h>
 #include <syslog.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <execinfo.h>
+#ifdef __GLIBC__
+#  include <execinfo.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
 #if __STDC_VERSION__ < 201112L
 #  define _Noreturn
+#else
+#  include <stdnoreturn.h>
 #endif
 
 
@@ -41,6 +45,7 @@ void __wrap_openlog (const char *_ident, int _logopt, int _facility) {
 }
 
 void print_backtrace(void) {
+#   ifdef __GLIBC__
     char **strings; int i;
     void  *backtrace_b[20];
     int    backtrace_bsz;
@@ -56,6 +61,7 @@ void print_backtrace(void) {
         }
         free (strings);
     }
+#   endif
 }
 
 void __wrap_vsyslog(int _prio, char const *_fmt, va_list _va) {

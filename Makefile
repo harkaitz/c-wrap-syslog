@@ -1,31 +1,32 @@
 DESTDIR    =
 PREFIX     =/usr/local
+PREFIX_TC  =/usr/local
+SUDO_TC    =sudo
 CC         =gcc
 CFLAGS     =-Wall
 AR         =ar
 PROGS      =example-w$(EXE) example-nw$(EXE)
 LIBRARIES  =libwrap-syslog.a
-CFLAGS_ALL =$(CFLAGS) $(CPPFLAGS)
 
 ## --------------------------------------------------------
 all: $(PROGS) $(LIBRARIES)
 clean:
 	rm -f $(PROGS) $(LIBRARIES)
 install:  $(LIBRARIES) ./l-wrap-syslog
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	$(SUDO_TC) mkdir -p $(DESTDIR)$(PREFIX_TC)/bin
+	$(SUDO_TC) cp l-wrap-syslog $(DESTDIR)$(PREFIX_TC)/bin
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
-	cp l-wrap-syslog $(DESTDIR)$(PREFIX)/bin
 	cp $(LIBRARIES) $(DESTDIR)$(PREFIX)/lib
 
 ## --------------------------------------------------------
 libwrap-syslog.a: wrap-syslog.c
-	$(CC) -c -o wrap-syslog.o $< $(CFLAGS_ALL) $(LIBS)
+	$(CC) -c -o wrap-syslog.o $< $(CFLAGS) $(CPPFLAGS)
 	$(AR) -crs $@ wrap-syslog.o
 	rm -f wrap-syslog.o
 example-w$(EXE): example.c libwrap-syslog.a
-	$(CC) -o $@ $^ -L. `./l-wrap-syslog`
+	$(CC) -o $@ $^ -L. `./l-wrap-syslog` $(CFLAGS) $(CPPFLAGS)
 example-nw$(EXE): example.c libwrap-syslog.a
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ $(CFLAGS) $(CPPFLAGS)
 
 ## --------------------------------------------------------
 test: $(PROGS)
