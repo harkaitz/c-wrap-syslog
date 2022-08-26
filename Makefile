@@ -39,7 +39,8 @@ test: $(PROGS)
 ifneq ($(PREFIX),)
 install: install-license
 install-license: LICENSE
-	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/c-wrap-syslog
-	cp LICENSE $(DESTDIR)$(PREFIX)/share/doc/c-wrap-syslog
+	@echo 'I share/doc/c-wrap-syslog/LICENSE'
+	@mkdir -p $(DESTDIR)$(PREFIX)/share/doc/c-wrap-syslog
+	@cp LICENSE $(DESTDIR)$(PREFIX)/share/doc/c-wrap-syslog
 endif
 ## -- license --
