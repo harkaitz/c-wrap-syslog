@@ -20,8 +20,7 @@ install:  $(LIBRARIES) ./l-wrap-syslog
 	@echo "I $(PREFIX)/lib/ $(LIBRARIES)"
 	@mkdir -p $(DESTDIR)$(PREFIX)/lib
 	@cp $(LIBRARIES) $(DESTDIR)$(PREFIX)/lib
-
-## --------------------------------------------------------
+## -- library and examples
 libwrap-syslog.a: wrap-syslog.c
 	@echo "B $@ $^"
 	@$(CC) -c -o wrap-syslog.o $< $(CFLAGS) $(CPPFLAGS)
@@ -33,18 +32,15 @@ example-w$(EXE): example.c libwrap-syslog.a
 example-nw$(EXE): example.c libwrap-syslog.a
 	@echo "B $@ $^"
 	@$(CC) -o $@ $^ $(CFLAGS) $(CPPFLAGS)
-
-## --------------------------------------------------------
+## -- test
 test: $(PROGS)
 	@echo "==== NOT WRAPPED ========="
 	@./example-nw
 	@echo "==== WRAPPED ============="
 	@./example-w
-
 ## -- license --
 install: install-license
 install-license: LICENSE
-	@echo 'I share/doc/c-wrap-syslog/LICENSE'
-	@mkdir -p $(DESTDIR)$(PREFIX)/share/doc/c-wrap-syslog
-	@cp LICENSE $(DESTDIR)$(PREFIX)/share/doc/c-wrap-syslog
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/c-wrap-syslog
+	cp LICENSE $(DESTDIR)$(PREFIX)/share/doc/c-wrap-syslog
 ## -- license --
