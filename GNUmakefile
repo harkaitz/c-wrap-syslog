@@ -1,3 +1,5 @@
+PROJECT    =c-wrap-syslog
+VERSION    =1.0.0
 DESTDIR    =
 PREFIX     =/usr/local
 PREFIX_TC  =/usr/local
@@ -38,9 +40,19 @@ test: $(PROGS)
 	@./example-nw
 	@echo "==== WRAPPED ============="
 	@./example-w
-## -- license --
+## -- BLOCK:license --
 install: install-license
-install-license: LICENSE
-	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/c-wrap-syslog
-	cp LICENSE $(DESTDIR)$(PREFIX)/share/doc/c-wrap-syslog
-## -- license --
+install-license: 
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/$(PROJECT)
+	cp LICENSE README.md $(DESTDIR)$(PREFIX)/share/doc/$(PROJECT)
+update: update-license
+update-license:
+	ssnip README.md
+## -- BLOCK:license --
+## -- BLOCK:man --
+update: update-man
+update-man:
+	make-h-man update
+install: install-man
+install-man:
+## -- BLOCK:man --
