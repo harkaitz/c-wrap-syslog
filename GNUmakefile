@@ -2,39 +2,29 @@ PROJECT    =c-wrap-syslog
 VERSION    =1.0.0
 DESTDIR    =
 PREFIX     =/usr/local
-PREFIX_TC  =/usr/local
-SUDO_TC    =sudo
-CC         =gcc
-CFLAGS     =-Wall
+CC         =gcc -pedantic-errors -std=c99 -Wall
 AR         =ar
 PROGS      =example-w$(EXE) example-nw$(EXE)
 LIBRARIES  =libwrap-syslog.a
-
-## --------------------------------------------------------
+##
 all: $(PROGS) $(LIBRARIES)
-clean:
-	@echo "D $(PROGS) $(LIBRARIES)"
-	@rm -f $(PROGS) $(LIBRARIES)
-install:  $(LIBRARIES) ./l-wrap-syslog
-	@echo "B $(PREFIX_TC)/bin/l-wrap-syslog"
-	@$(SUDO_TC) mkdir -p $(DESTDIR)$(PREFIX_TC)/bin
-	@$(SUDO_TC) cp l-wrap-syslog $(DESTDIR)$(PREFIX_TC)/bin
-	@echo "I $(PREFIX)/lib/ $(LIBRARIES)"
+clean:	
+	rm -f $(PROGS) $(LIBRARIES)
+install:
+	@mkdir -p $(DESTDIR)$(if $(PREFIX_TC),$(PREFIX_TC),$(PREFIX))/bin
 	@mkdir -p $(DESTDIR)$(PREFIX)/lib
-	@cp $(LIBRARIES) $(DESTDIR)$(PREFIX)/lib
-## -- library and examples
+	cp l-wrap-syslog $(DESTDIR)$(if $(PREFIX_TC),$(PREFIX_TC),$(PREFIX))/bin
+	cp $(LIBRARIES) $(DESTDIR)$(PREFIX)/lib
+##
 libwrap-syslog.a: wrap-syslog.c
-	@echo "B $@ $^"
-	@$(CC) -c -o wrap-syslog.o $< $(CFLAGS) $(CPPFLAGS)
-	@$(AR) -crs $@ wrap-syslog.o
-	@rm -f wrap-syslog.o
+	$(CC) -c -o wrap-syslog.o $< $(CFLAGS) $(CPPFLAGS)
+	$(AR) -crs $@ wrap-syslog.o
+	rm -f wrap-syslog.o
 example-w$(EXE): example.c libwrap-syslog.a
-	@echo "B $@ $^"
-	@$(CC) -o $@ $^ -L. `./l-wrap-syslog` $(CFLAGS) $(CPPFLAGS)
+	$(CC) -o $@ $^ -L. `./l-wrap-syslog` $(CFLAGS) $(CPPFLAGS)
 example-nw$(EXE): example.c libwrap-syslog.a
-	@echo "B $@ $^"
-	@$(CC) -o $@ $^ $(CFLAGS) $(CPPFLAGS)
-## -- test
+	$(CC) -o $@ $^ $(CFLAGS) $(CPPFLAGS)
+##
 test: $(PROGS)
 	@echo "==== NOT WRAPPED ========="
 	@./example-nw
@@ -43,16 +33,6 @@ test: $(PROGS)
 ## -- BLOCK:license --
 install: install-license
 install-license: 
-	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/$(PROJECT)
-	cp LICENSE README.md $(DESTDIR)$(PREFIX)/share/doc/$(PROJECT)
-update: update-license
-update-license:
-	ssnip README.md
+	@mkdir -p $(DESTDIR)$(PREFIX)/share/doc/$(PROJECT)
+	cp LICENSE  $(DESTDIR)$(PREFIX)/share/doc/$(PROJECT)
 ## -- BLOCK:license --
-## -- BLOCK:man --
-update: update-man
-update-man:
-	make-h-man update
-install: install-man
-install-man:
-## -- BLOCK:man --
