@@ -1,0 +1,1 @@
+Wrap "syslog" "vsyslog" "verr" "err" "verrx" "errx" calls and add a backtrace.
